@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync } from "expo-location";
 
@@ -8,6 +8,10 @@ import { TextPrimary } from "../../components/TextPrimary";
 import { MeteoBasic } from "../../components/MeteoBasic";
 import { getWeatherInterpretation } from "../../services/meteo-service";
 import { CityAPI } from "../../api/city";
+import { MeteoAdvanced } from "../../components/MeteoAdvanced";
+import { useNavigation } from "@react-navigation/native";
+import { ContainerApp } from "../../components/ContainerApp";
+import { SearchBar } from "../../components/SearchBar";
 
 export function Home({}) {
 
@@ -16,6 +20,20 @@ export function Home({}) {
     const [weather, setWeather]     = useState(); 
     const [city,setCity]            = useState();
     const currentWeather            = weather?.current_weather //current_weather : Variable de l'API open-meteo
+
+    
+    //
+    //
+    //
+    //
+    //
+    // ------------------------------------------------ //
+    //             GESTION DE LA NAVIGATION             //
+    // ------------------------------------------------ //
+    const navigation = useNavigation();
+    function navigateToForecastScreen() {
+        navigation.navigate("Forecast", {city, ...weather})
+    };
     //
     //
     //
@@ -90,15 +108,32 @@ export function Home({}) {
     //
     //
     //
-    // ------------------------------------------------ //
-    //     RECUPERATION DES INFORMATIONS DE LA VILLE    //
-    // ------------------------------------------------ //
+    // ---------------------------------------------------- //
+    // RECUPERATION DE LA VILLE EN FONCTION DES COORDONNEES //
+    // ---------------------------------------------------- //
     async function fetchCity(location){
 
         console.log("\n ----- fetchCity -----",);
 
         const cityResponse = await CityAPI.fetcCityFromLocation(location);
         setCity(cityResponse);
+        
+    };
+    // ---------------------------------------------------- //
+    // RECUPERATION DES COORDONNEES EN FONCTION DE LA VILLE //
+    // ---------------------------------------------------- //
+    async function fetchLocation(city){
+
+        console.log("\n ----- fetchLocation -----",);
+
+        try{
+            const locationResponse = await MeteoAPI.fetcLocationFromCity(city);
+            setLocation(locationResponse);
+
+        }catch(error){
+            Alert.alert('Oups !', error);
+        }
+       
         
     };
     //
@@ -112,27 +147,38 @@ export function Home({}) {
     // currentWeather ? : Cela évite d'avoie l'actualisation au début et d'avoir un flash bizarre.
     return currentWeather ? (
     
-        <>
+        <ContainerApp>
+
             <View style={stylesHomeScreen.containerMeteoBasic}>
 
                 <MeteoBasic 
                     temperature={Math.round(currentWeather?.temperature)}
                     city={city}
                     interpretation={getWeatherInterpretation(currentWeather.weathercode)}
+                    onPress={navigateToForecastScreen}
                 />
 
             </View>
 
 
             <View style={stylesHomeScreen.containerSearchbar}>
-
+                <SearchBar
+                    onSubmit={fetchLocation}
+                />
             </View>
 
 
             <View style={stylesHomeScreen.containerMeteoAdvanced}>
-            
+
+                <MeteoAdvanced
+                    dusk = {weather?.daily.sunrise[0].split("T")[1]}
+                    dawn = {weather?.daily.sunset[0].split("T")[1]}
+                    wind = {currentWeather?.windspeed}
+                />
+
             </View>
-        </>
+
+        </ContainerApp>
 
     ) : null;
 }

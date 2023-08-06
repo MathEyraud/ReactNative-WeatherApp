@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "react-native-meteo",
-    "slug": "react-native-meteo",
+    "slug": "weatherapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,10 +21,24 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.eyraudmathieu.weatherapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "41149c55-7b48-4476-a5cf-26616c543b3d"
+      }
+    },
+    "owner": "eyraudmathieu",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/41149c55-7b48-4476-a5cf-26616c543b3d"
     }
   }
 }
