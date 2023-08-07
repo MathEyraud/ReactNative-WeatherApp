@@ -1,5 +1,5 @@
-import { Alert, Text, View } from "react-native";
-import { useEffect, useState } from "react";
+import { Alert, ScrollView, Text, View, RefreshControl } from "react-native";
+import React, { useEffect, useState } from "react";
 import { requestForegroundPermissionsAsync, getCurrentPositionAsync } from "expo-location";
 
 import { stylesHomeScreen } from "./style";
@@ -16,12 +16,32 @@ import { SearchBar } from "../../components/SearchBar";
 export function Home({}) {
 
     // VARIABLES
-    const [location, setLocation]   = useState();
-    const [weather, setWeather]     = useState(); 
-    const [city,setCity]            = useState();
-    const currentWeather            = weather?.current_weather //current_weather : Variable de l'API open-meteo
+    const [location, setLocation]       = useState();
+    const [weather, setWeather]         = useState(); 
+    const [city,setCity]                = useState();
+    const [refreshing, setRefreshing]   = React.useState(false);
+    const currentWeather                = weather?.current_weather //current_weather : Variable de l'API open-meteo
+    //
+    //
+    //
+    //
+    //
+    // ------------------------------------------------ //
+    //                GESTION DU REFRESH                //
+    // ------------------------------------------------ //
+    const onRefresh = React.useCallback(() => {
 
-    
+        setRefreshing(true);
+
+        try {
+            getUserLocation();
+            setRefreshing(false);
+        } catch (error) {
+            Alert.alert('Oups !', error);
+            setRefreshing(false);
+        }
+
+    }, []);
     //
     //
     //
@@ -146,37 +166,46 @@ export function Home({}) {
     // ------------------------------- //
     // currentWeather ? : Cela évite d'avoie l'actualisation au début et d'avoir un flash bizarre.
     return currentWeather ? (
-    
+ 
         <ContainerApp>
 
-            <View style={stylesHomeScreen.containerMeteoBasic}>
+            <ScrollView
+                contentContainerStyle={stylesHomeScreen.containerScroll}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
 
-                <MeteoBasic 
-                    temperature={Math.round(currentWeather?.temperature)}
-                    city={city}
-                    interpretation={getWeatherInterpretation(currentWeather.weathercode)}
-                    onPress={navigateToForecastScreen}
-                />
+                <View style={stylesHomeScreen.containerMeteoBasic}>
 
-            </View>
+                    <MeteoBasic 
+                        temperature={Math.round(currentWeather?.temperature)}
+                        city={city}
+                        interpretation={getWeatherInterpretation(currentWeather.weathercode)}
+                        onPress={navigateToForecastScreen}
+                    />
 
-
-            <View style={stylesHomeScreen.containerSearchbar}>
-                <SearchBar
-                    onSubmit={fetchLocation}
-                />
-            </View>
+                </View>
 
 
-            <View style={stylesHomeScreen.containerMeteoAdvanced}>
+                <View style={stylesHomeScreen.containerSearchbar}>
+                    <SearchBar
+                        onSubmit={fetchLocation}
+                    />
+                </View>
 
-                <MeteoAdvanced
-                    dusk = {weather?.daily.sunrise[0].split("T")[1]}
-                    dawn = {weather?.daily.sunset[0].split("T")[1]}
-                    wind = {currentWeather?.windspeed}
-                />
 
-            </View>
+                <View style={stylesHomeScreen.containerMeteoAdvanced}>
+
+                    <MeteoAdvanced
+                        dusk = {weather?.daily.sunrise[0].split("T")[1]}
+                        dawn = {weather?.daily.sunset[0].split("T")[1]}
+                        wind = {Math.round(currentWeather?.windspeed)}
+                    />
+
+                </View>
+
+            </ScrollView>
 
         </ContainerApp>
 

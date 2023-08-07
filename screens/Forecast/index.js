@@ -10,7 +10,7 @@ import { DAYS, dateToDDMM } from "../../services/date-service";
 export function Forecast({}) {
 
     // VARIABLES
-    const {params} = useRoute();    console.log("params :",params);
+    const {params} = useRoute();
     const ville = params.city;
     
     //

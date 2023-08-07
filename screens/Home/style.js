@@ -28,4 +28,12 @@ export const stylesHomeScreen = StyleSheet.create({
         flex: 1,
     },
 
+    // ------------------------- //
+    //         SCROLL VIEW       //
+    // ------------------------- //
+    containerScroll:{
+        flex: 1,
+    },
+
+
 });
